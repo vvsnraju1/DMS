@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Clock, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -180,11 +180,11 @@ export default function PendingTasks() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your pending tasks...</p>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative">
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600" />
         </div>
+        <p className="mt-4 text-gray-600 font-medium">Loading your pending tasks...</p>
       </div>
     );
   }
@@ -201,11 +201,11 @@ export default function PendingTasks() {
   }
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Pending Tasks</h1>
-        <p className="text-gray-600 mt-1">Documents awaiting your action</p>
+      <div className="mb-8">
+        <h1 className="page-title">Pending Tasks</h1>
+        <p className="page-subtitle">Documents awaiting your action</p>
       </div>
 
       {/* Tabs */}

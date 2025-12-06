@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Clock, AlertCircle, Download, MessageSquare, CheckCircle } from 'lucide-react';
 import { useEditor } from '../../hooks/useEditor';
@@ -234,22 +234,22 @@ export default function DocumentEditor() {
     // Try to find and highlight the text in the document
     try {
       // Clear any existing highlights first
-      const existingHighlights = document.querySelectorAll('.comment-highlight');
-      existingHighlights.forEach(el => {
+      const existingHighlights = globalThis.document.querySelectorAll('.comment-highlight');
+      existingHighlights.forEach((el: Element) => {
         const parent = el.parentNode;
         if (parent) {
-          parent.replaceChild(document.createTextNode(el.textContent || ''), el);
-          parent.normalize();
+          parent.replaceChild(globalThis.document.createTextNode(el.textContent || ''), el);
+          (parent as Node).normalize();
         }
       });
       
       // Use window.find to locate the text (works in most browsers)
-      if (window.find) {
+      if ((window as any).find) {
         // Clear previous selection
         window.getSelection()?.removeAllRanges();
         
         // Find the text
-        const found = window.find(comment.selected_text, false, false, true, false, true, false);
+        const found = (window as any).find(comment.selected_text, false, false, true, false, true, false);
         
         if (found) {
           // Get the selection
@@ -258,7 +258,7 @@ export default function DocumentEditor() {
             const range = selection.getRangeAt(0);
             
             // Create a highlight span
-            const highlight = document.createElement('span');
+            const highlight = globalThis.document.createElement('span');
             highlight.className = 'comment-highlight';
             highlight.style.backgroundColor = '#FEF3C7'; // yellow-100
             highlight.style.padding = '2px 4px';
@@ -275,8 +275,8 @@ export default function DocumentEditor() {
               setTimeout(() => {
                 const parent = highlight.parentNode;
                 if (parent) {
-                  parent.replaceChild(document.createTextNode(highlight.textContent || ''), highlight);
-                  parent.normalize();
+                  parent.replaceChild(globalThis.document.createTextNode(highlight.textContent || ''), highlight);
+                  (parent as Node).normalize();
                 }
               }, 3000);
             } catch (err) {
@@ -585,10 +585,15 @@ export default function DocumentEditor() {
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading document...</p>
+          <div className="relative">
+            <div className="h-16 w-16 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 mx-auto" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xl font-display font-bold text-primary-600">Q</span>
+            </div>
+          </div>
+          <p className="mt-6 text-gray-600 font-medium">Loading document editor...</p>
         </div>
       </div>
     );
@@ -597,21 +602,20 @@ export default function DocumentEditor() {
   // Error state
   if (error) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-2xl mx-auto">
-          <div className="flex items-start gap-3">
-            <AlertCircle size={24} className="text-red-600 flex-shrink-0 mt-1" />
-            <div>
-              <h2 className="text-lg font-semibold text-red-900 mb-2">Error Loading Document</h2>
-              <p className="text-red-800 mb-4">{error}</p>
-              <button
-                onClick={() => navigate('/documents')}
-                className="text-red-600 hover:text-red-800 underline"
-              >
-                Back to Documents
-              </button>
-            </div>
+      <div className="p-6 h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white border border-red-200 rounded-2xl p-8 max-w-md w-full text-center shadow-lg">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle size={32} className="text-red-600" />
           </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Error Loading Document</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => navigate('/documents')}
+            className="btn btn-primary"
+          >
+            <ArrowLeft size={18} />
+            Back to Documents
+          </button>
         </div>
       </div>
     );
@@ -620,16 +624,20 @@ export default function DocumentEditor() {
   // No document/version state
   if (!document || !version) {
     return (
-      <div className="p-6">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-2xl mx-auto">
-          <h2 className="text-lg font-semibold text-yellow-900 mb-2">No Version Available</h2>
-          <p className="text-yellow-800 mb-4">
+      <div className="p-6 h-screen flex items-center justify-center bg-gray-50">
+        <div className="bg-white border border-amber-200 rounded-2xl p-8 max-w-md w-full text-center shadow-lg">
+          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle size={32} className="text-amber-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">No Version Available</h2>
+          <p className="text-gray-600 mb-6">
             This document doesn't have any versions yet. Create a draft version first.
           </p>
           <button
             onClick={() => navigate('/documents')}
-            className="text-yellow-600 hover:text-yellow-800 underline"
+            className="btn btn-primary"
           >
+            <ArrowLeft size={18} />
             Back to Documents
           </button>
         </div>
@@ -638,24 +646,29 @@ export default function DocumentEditor() {
   }
   
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50/50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white/95 backdrop-blur-lg border-b border-gray-200/50 px-6 py-4 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           {/* Left: Back button and title */}
           <div className="flex items-center gap-4">
             <button
               onClick={handleBack}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center text-gray-500 hover:text-gray-900 transition-colors text-sm font-medium"
             >
-              <ArrowLeft size={20} className="mr-2" />
+              <ArrowLeft size={18} className="mr-1" />
               Back
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">{document.title}</h1>
-              <p className="text-sm text-gray-500">
-                {document.document_number} • Version {version.version_number}
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-brand-600 flex items-center justify-center shadow-md shadow-primary-500/20">
+                <span className="text-white font-display font-bold">Q</span>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">{document.title}</h1>
+                <p className="text-sm text-gray-500">
+                  {document.document_number} • Version {version.version_number}
+                </p>
+              </div>
             </div>
           </div>
           

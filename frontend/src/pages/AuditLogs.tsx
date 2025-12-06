@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auditService } from '@/services/audit.service';
 import { AuditLog } from '@/types';
-import { Search, Filter, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatISTDateTime } from '../utils/dateUtils';
 
 const AuditLogs: React.FC = () => {
@@ -92,16 +92,16 @@ const AuditLogs: React.FC = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Audit Logs</h1>
-          <p className="text-gray-600 mt-1">System activity and compliance trail</p>
+          <h1 className="page-title">Audit Logs</h1>
+          <p className="page-subtitle">System activity and compliance trail</p>
         </div>
         <button
           onClick={() => fetchLogs()}
-          className="btn btn-secondary flex items-center"
+          className="btn btn-secondary"
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
+          <RefreshCw className="w-4 h-4" />
           Refresh
         </button>
       </div>

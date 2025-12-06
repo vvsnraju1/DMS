@@ -75,29 +75,29 @@ export default function DocumentList() {
   };
 
   return (
-    <div className="p-6">
+    <div>
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Published Documents</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="page-title">Published Documents</h1>
+          <p className="page-subtitle">
             Official SOP documents approved for use
           </p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => navigate('/tasks')}
-            className="flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            className="btn btn-secondary"
           >
-            <ClipboardList size={20} />
+            <ClipboardList size={18} />
             Pending Tasks
           </button>
           {canCreateDocuments && (
             <button
               onClick={() => navigate('/documents/create')}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn btn-primary"
             >
-              <Plus size={20} />
+              <Plus size={18} />
               Create Document
             </button>
           )}
@@ -105,12 +105,14 @@ export default function DocumentList() {
       </div>
 
       {/* Info Banner */}
-      <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-start gap-3">
-          <FileText className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
+      <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <FileText className="text-emerald-600" size={20} />
+          </div>
           <div>
-            <h3 className="font-semibold text-green-900">Official Published Documents</h3>
-            <p className="text-sm text-green-800 mt-1">
+            <h3 className="font-bold text-emerald-900">Official Published Documents</h3>
+            <p className="text-sm text-emerald-700 mt-1">
               This page shows <strong>only published</strong> SOP documents that are official and approved for use.
               Documents in draft, review, or approval stages appear in the <strong>Pending Tasks</strong> page based on your role.
             </p>

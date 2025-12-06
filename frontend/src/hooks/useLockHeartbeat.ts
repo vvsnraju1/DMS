@@ -26,7 +26,7 @@ export function useLockHeartbeat({
   onError,
   onSuccess,
 }: UseLockHeartbeatOptions) {
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isRunningRef = useRef(false);
 
   useEffect(() => {

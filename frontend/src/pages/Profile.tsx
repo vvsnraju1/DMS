@@ -47,20 +47,22 @@ const Profile: React.FC = () => {
   if (loading) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary-100 border-t-primary-600" />
-        <p className="text-sm text-gray-500">Loading your account profile…</p>
+        <div className="relative">
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600" />
+        </div>
+        <p className="text-gray-600 font-medium">Loading your profile…</p>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <header className="rounded-3xl bg-white p-8 shadow">
+      <header className="rounded-3xl bg-white p-8 shadow-soft border border-gray-100">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary-500">Account</p>
-            <h1 className="mt-2 text-3xl font-bold text-gray-900">Your profile</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="text-xs font-bold uppercase tracking-wider text-primary-500">Account</p>
+            <h1 className="mt-2 page-title">Your Profile</h1>
+            <p className="mt-1 text-gray-500">
               Keep your contact information up to date to ensure workflow notifications reach you.
             </p>
           </div>

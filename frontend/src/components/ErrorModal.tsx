@@ -2,7 +2,6 @@
  * ErrorModal Component
  * Displays error messages in a styled application modal instead of browser alert
  */
-import React from 'react';
 import { XCircle, X, AlertTriangle } from 'lucide-react';
 
 interface ErrorModalProps {

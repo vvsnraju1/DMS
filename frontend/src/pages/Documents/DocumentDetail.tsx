@@ -460,25 +460,29 @@ export default function DocumentDetail() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading document...</p>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="relative">
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600" />
         </div>
+        <p className="mt-4 text-gray-600 font-medium">Loading document...</p>
       </div>
     );
   }
 
   if (error || !document) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-900 mb-2">Error</h2>
-          <p className="text-red-800">{error || 'Document not found'}</p>
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <XCircle className="text-red-500" size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-red-900 mb-2">Error Loading Document</h2>
+          <p className="text-red-700 mb-6">{error || 'Document not found'}</p>
           <button
             onClick={() => navigate('/documents')}
-            className="mt-4 text-red-600 hover:text-red-800 underline"
+            className="btn btn-primary"
           >
+            <ArrowLeft size={18} />
             Back to Documents
           </button>
         </div>
@@ -487,25 +491,30 @@ export default function DocumentDetail() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <button
           onClick={() => navigate('/documents')}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          className="flex items-center text-gray-500 hover:text-gray-900 mb-4 transition-colors text-sm font-medium"
         >
-          <ArrowLeft size={20} className="mr-2" />
+          <ArrowLeft size={18} className="mr-2" />
           Back to Documents
         </button>
 
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{document.title}</h1>
-            <p className="text-gray-600">{document.document_number}</p>
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-brand-600 flex items-center justify-center shadow-lg shadow-primary-500/25 flex-shrink-0">
+              <FileText className="text-white" size={28} />
+            </div>
+            <div>
+              <h1 className="page-title mb-1">{document.title}</h1>
+              <p className="text-gray-500 font-medium">{document.document_number}</p>
+            </div>
           </div>
           {latestVersion && (
             <span
-              className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(
+              className={`px-4 py-2 rounded-xl text-sm font-bold ${getStatusColor(
                 latestVersion.status
               )}`}
             >

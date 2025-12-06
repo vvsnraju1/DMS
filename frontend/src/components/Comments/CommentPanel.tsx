@@ -2,7 +2,7 @@
  * CommentPanel Component
  * Displays all comments in a right sidebar
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DocumentComment } from '../../types/document';
 import { MessageSquare, Check, Trash2, Edit2, User, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';

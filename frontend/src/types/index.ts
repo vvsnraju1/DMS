@@ -56,6 +56,7 @@ export interface UserInfo {
   full_name: string;
   roles: string[];
   is_active: boolean;
+  is_admin?: boolean; // Derived from roles for convenience
 }
 
 export interface LoginResponse {

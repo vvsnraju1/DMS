@@ -140,13 +140,13 @@ const UserList: React.FC = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Users</h1>
-          <p className="text-gray-600 mt-1">Manage system users and permissions</p>
+          <h1 className="page-title">Users</h1>
+          <p className="page-subtitle">Manage system users and permissions</p>
         </div>
-        <Link to="/users/create" className="btn btn-primary flex items-center">
-          <Plus className="w-5 h-5 mr-2" />
+        <Link to="/users/create" className="btn btn-primary">
+          <Plus className="w-5 h-5" />
           Create User
         </Link>
       </div>

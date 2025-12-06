@@ -603,9 +603,15 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="h-14 w-14 animate-spin rounded-full border-4 border-slate-200 border-t-primary-600" />
-        <p className="mt-4 text-gray-600">Preparing your personalised dashboard...</p>
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="relative">
+          <div className="h-16 w-16 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-xl font-display font-bold text-primary-600">Q</span>
+          </div>
+        </div>
+        <p className="mt-6 text-lg font-medium text-gray-600">Loading your dashboard...</p>
+        <p className="text-sm text-gray-400">Preparing personalized insights</p>
       </div>
     );
   }
@@ -619,7 +625,7 @@ const Dashboard: React.FC = () => {
               <Sparkles className="h-4 w-4" />
               {roleTheme.label}
             </div>
-            <h1 className="mt-3 text-3xl font-bold">{user?.full_name || 'Welcome back'}</h1>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight">{user?.full_name || 'Welcome back'}</h1>
             <p className="mt-2 max-w-2xl text-base text-white/80">{roleTheme.description}</p>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
               {user?.email && <span className="rounded-full bg-white/20 px-3 py-1">{user.email}</span>}
@@ -644,7 +650,7 @@ const Dashboard: React.FC = () => {
             {heroMetrics.map((metric) => (
               <div key={metric.label} className="rounded-2xl bg-white/10 p-4 backdrop-blur">
                 <p className="text-xs font-semibold uppercase tracking-wide text-white/70">{metric.label}</p>
-                <p className="mt-2 text-3xl font-bold">
+                <p className="mt-2 text-3xl font-semibold">
                   {metric.value}
                   {metric.suffix}
                 </p>
@@ -675,7 +681,7 @@ const Dashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase text-gray-500">Workflow momentum</p>
-                  <h2 className="text-2xl font-bold text-gray-900">Pipeline overview</h2>
+                  <h2 className="text-2xl font-semibold text-gray-900">Pipeline overview</h2>
                   <p className="text-sm text-gray-500">Track how documents move from draft to publication.</p>
                 </div>
                 <div className="rounded-2xl bg-primary-50 p-3 text-primary-600">
@@ -687,7 +693,7 @@ const Dashboard: React.FC = () => {
                   <div key={stage.key}>
                     <div className="mb-1 flex items-center justify-between text-sm text-gray-600">
                       <span>{stage.title}</span>
-                      <span className="font-semibold text-gray-900">{formatNumber(stage.count)} docs</span>
+                      <span className="font-medium text-gray-900">{formatNumber(stage.count)} docs</span>
                     </div>
                     <div className="h-2 rounded-full bg-gray-100">
                       <div className={`h-full rounded-full ${stage.barColor}`} style={{ width: `${stage.percent}%` }} />
@@ -709,7 +715,7 @@ const Dashboard: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-semibold uppercase text-gray-500">{stage.title}</p>
-                        <p className="mt-1 text-3xl font-bold text-gray-900">{formatNumber(data?.total ?? 0)}</p>
+                        <p className="mt-1 text-3xl font-semibold text-gray-900">{formatNumber(data?.total ?? 0)}</p>
                         <p className="text-sm text-gray-600">{stage.description}</p>
                       </div>
                       <div className="rounded-2xl bg-white/80 p-3 text-primary-600">
@@ -724,7 +730,7 @@ const Dashboard: React.FC = () => {
                           className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/70 px-3 py-2 text-sm text-gray-700 hover:bg-white"
                         >
                           <div className="min-w-0">
-                            <p className="truncate font-semibold text-gray-900">{doc.title}</p>
+                            <p className="truncate font-medium text-gray-900">{doc.title}</p>
                             <p className="truncate text-xs text-gray-500">
                               {doc.document_number || `DOC-${doc.id}`} • {doc.department || 'No department'}
                             </p>
@@ -752,7 +758,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase text-gray-500">People snapshot</p>
-                    <h3 className="text-xl font-bold text-gray-900">User & compliance health</h3>
+                    <h3 className="text-xl font-semibold text-gray-900">User & compliance health</h3>
                   </div>
                   <div className="rounded-2xl bg-slate-100 p-3 text-slate-700">
                     <Users className="h-6 w-6" />
@@ -761,11 +767,11 @@ const Dashboard: React.FC = () => {
                 <div className="mt-6 grid gap-4 sm:grid-cols-3">
                   <div>
                     <p className="text-sm text-gray-500">Total users</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalUsers)}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{formatNumber(stats.totalUsers)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Active licences</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.activeUsers)}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{formatNumber(stats.activeUsers)}</p>
                     <p className="text-xs text-gray-500">
                       {(stats.totalUsers && stats.activeUsers
                         ? Math.round((stats.activeUsers / stats.totalUsers) * 100)
@@ -776,7 +782,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Audit log entries</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.recentAuditLogs)}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{formatNumber(stats.recentAuditLogs)}</p>
                   </div>
                 </div>
               </div>
@@ -794,7 +800,7 @@ const Dashboard: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-semibold uppercase text-gray-500">{action.title}</p>
-                        <p className="mt-1 text-3xl font-bold text-gray-900">{formatNumber(action.count)}</p>
+                        <p className="mt-1 text-3xl font-semibold text-gray-900">{formatNumber(action.count)}</p>
                       </div>
                       <div className="rounded-2xl bg-gray-50 p-3 text-primary-600">
                         <ActionIcon className="h-6 w-6" />
@@ -816,7 +822,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase text-gray-500">Role playbook</p>
-                  <h3 className="text-xl font-bold text-gray-900">Focus actions</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">Focus actions</h3>
                 </div>
               </div>
               <div className="mt-5 space-y-4">
@@ -832,7 +838,7 @@ const Dashboard: React.FC = () => {
                         <ActionIcon className="h-5 w-5" />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{action.title}</p>
+                        <p className="text-sm font-medium text-gray-900">{action.title}</p>
                         <p className="text-xs text-gray-500">{action.description}</p>
                       </div>
                     </Link>
@@ -848,7 +854,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase text-gray-500">Focus cues</p>
-                  <h3 className="text-xl font-bold text-gray-900">Pro tips</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">Pro tips</h3>
                 </div>
               </div>
               <ul className="mt-5 space-y-3">
@@ -866,7 +872,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase text-gray-500">System activity</p>
-                    <h3 className="text-xl font-bold text-gray-900">Most recent events</h3>
+                    <h3 className="text-xl font-semibold text-gray-900">Most recent events</h3>
                   </div>
                   <div className="rounded-2xl bg-orange-50 p-3 text-orange-600">
                     <BellRing className="h-5 w-5" />
@@ -875,7 +881,7 @@ const Dashboard: React.FC = () => {
                 <div className="mt-4 space-y-4">
                   {recentActivity.map((log) => (
                     <div key={log.id} className="rounded-2xl border border-gray-100 p-3">
-                      <div className="flex items-center justify-between text-sm font-semibold text-gray-900">
+                      <div className="flex items-center justify-between text-sm font-medium text-gray-900">
                         <span>{log.action}</span>
                         <span className="text-xs text-gray-500">{formatIST(log.timestamp, { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
@@ -894,9 +900,16 @@ const Dashboard: React.FC = () => {
           </div>
       </div>
 
-      <div className="mt-6 text-center text-sm text-gray-500">
-        <p>Q-Docs v1.0.0 · Intelligent workflow dashboards</p>
-        <p className="mt-1">FDA 21 CFR Part 11 Compliance Ready</p>
+      <div className="mt-8 text-center">
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-white rounded-2xl shadow-soft border border-gray-100">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-brand-500 flex items-center justify-center">
+            <span className="text-white text-sm font-display font-bold">Q</span>
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-semibold text-gray-700">Q-Docs v1.0.0</p>
+            <p className="text-xs text-gray-400">FDA 21 CFR Part 11 Compliant</p>
+          </div>
+        </div>
       </div>
     </div>
   );

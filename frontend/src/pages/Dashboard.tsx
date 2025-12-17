@@ -87,7 +87,7 @@ const PIPELINE_ORDER: StageKey[] = ['draft', 'review', 'approval', 'ready', 'pub
 const STAGE_PIPELINE: StageConfig[] = [
   {
     key: 'draft',
-    status: 'Draft',
+    status: 'DRAFT',
     title: 'Drafting desk',
     description: 'Work-in-progress documents with active authorship.',
     accent: 'from-sky-50 via-white to-white',
@@ -101,7 +101,7 @@ const STAGE_PIPELINE: StageConfig[] = [
   },
   {
     key: 'review',
-    status: 'Under Review',
+    status: 'UNDER_REVIEW',
     title: 'Review lane',
     description: 'Reviewer queues waiting for feedback or sign-off.',
     accent: 'from-indigo-50 via-white to-white',
@@ -115,7 +115,7 @@ const STAGE_PIPELINE: StageConfig[] = [
   },
   {
     key: 'approval',
-    status: 'Pending Approval',
+    status: 'PENDING_APPROVAL',
     title: 'Approval desk',
     description: 'Approver and QA checkpoints pending decision.',
     accent: 'from-amber-50 via-white to-white',
@@ -129,7 +129,7 @@ const STAGE_PIPELINE: StageConfig[] = [
   },
   {
     key: 'ready',
-    status: 'Approved',
+    status: 'APPROVED',
     title: 'Ready to publish',
     description: 'Approved versions awaiting HOD / publisher action.',
     accent: 'from-emerald-50 via-white to-white',
@@ -143,7 +143,7 @@ const STAGE_PIPELINE: StageConfig[] = [
   },
   {
     key: 'published',
-    status: 'Published',
+    status: 'EFFECTIVE',
     title: 'Published library',
     description: 'Official SOPs available to the floor.',
     accent: 'from-teal-50 via-white to-white',
@@ -434,7 +434,20 @@ const Dashboard: React.FC = () => {
       const stagePromise = Promise.all(
         STAGE_PIPELINE.map(async (stage): Promise<{ key: StageKey; data: StageStat }> => {
           try {
-            const response = await documentService.list({ status: stage.status, limit: STAGE_DOC_LIMIT });
+            // For EFFECTIVE status, we don't need show_all_statuses (it's the default)
+            // For other statuses, we need show_all_statuses=true to see non-effective documents
+            const params: any = { 
+              status: stage.status, 
+              page: 1,
+              page_size: STAGE_DOC_LIMIT 
+            };
+            
+            // Only add show_all_statuses for non-EFFECTIVE statuses
+            if (stage.status !== 'EFFECTIVE') {
+              params.show_all_statuses = true;
+            }
+            
+            const response = await documentService.list(params);
             const items = response.items ?? [];
             return {
               key: stage.key,

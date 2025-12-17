@@ -33,22 +33,22 @@ export default function PendingTasks() {
 
     // Admin and Author see Drafts
     if (roles.includes('DMS_Admin') || roles.includes('Author')) {
-      taskTypes.push('Draft');
+      taskTypes.push('DRAFT');
     }
 
     // Reviewer sees Under Review
     if (roles.includes('Reviewer')) {
-      taskTypes.push('Under Review');
+      taskTypes.push('UNDER_REVIEW');
     }
 
     // Approver sees Pending Approval
     if (roles.includes('Approver')) {
-      taskTypes.push('Pending Approval');
+      taskTypes.push('PENDING_APPROVAL');
     }
 
     // DMS Admin sees everything + Ready to Publish
     if (roles.includes('DMS_Admin')) {
-      taskTypes.push('Under Review', 'Pending Approval', 'Ready to Publish');
+      taskTypes.push('UNDER_REVIEW', 'PENDING_APPROVAL', 'Ready to Publish');
     }
 
     return taskTypes;
@@ -66,8 +66,11 @@ export default function PendingTasks() {
         return;
       }
 
-      // Load all documents
-      const docsResponse = await documentService.list({ limit: 100 });
+      // Load all documents (including drafts, under review, etc.)
+      const docsResponse = await documentService.list({ 
+        limit: 100,
+        show_all_statuses: true  // Show all statuses, not just EFFECTIVE
+      });
       const allDocs = docsResponse.items || [];
 
       // For each document, get latest version and check status
@@ -95,20 +98,20 @@ export default function PendingTasks() {
           let taskType = '';
           let priority = 'medium';
 
-          if (status === 'Draft' && taskTypes.includes('Draft')) {
+          if (status === 'DRAFT' && taskTypes.includes('DRAFT')) {
             taskType = 'Draft - Continue Editing';
             // Set HIGH priority if document has unresolved comments (returned from reviewer)
             priority = unresolvedComments > 0 ? 'high' : 'low';
             if (unresolvedComments > 0) {
               taskType = 'Draft - Address Comments';
             }
-          } else if (status === 'Under Review' && taskTypes.includes('Under Review')) {
+          } else if (status === 'UNDER_REVIEW' && taskTypes.includes('UNDER_REVIEW')) {
             taskType = 'Review Required';
             priority = 'high';
-          } else if (status === 'Pending Approval' && taskTypes.includes('Pending Approval')) {
+          } else if (status === 'PENDING_APPROVAL' && taskTypes.includes('PENDING_APPROVAL')) {
             taskType = 'Approval Required';
             priority = 'high';
-          } else if (status === 'Approved' && taskTypes.includes('Ready to Publish')) {
+          } else if (status === 'APPROVED' && taskTypes.includes('Ready to Publish')) {
             taskType = 'Ready to Publish';
             priority = 'medium';
           }

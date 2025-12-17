@@ -2,7 +2,7 @@
 API v1 Routes
 """
 from fastapi import APIRouter
-from app.api.v1 import auth, users, audit_logs, documents, document_versions, edit_locks, attachments, comments
+from app.api.v1 import auth, users, audit_logs, documents, document_versions, edit_locks, attachments, comments, templates
 try:
     from app.api.v1 import export
     has_export = True
@@ -34,5 +34,15 @@ if has_export:
 
 # Comments
 api_router.include_router(comments.router, prefix="/documents", tags=["Comments"])
+
+# Templates
+api_router.include_router(templates.router, prefix="/templates", tags=["Templates"])
+
+# Template Builder (block-based)
+try:
+    from app.api.v1 import template_builder
+    api_router.include_router(template_builder.router, prefix="/template-builder", tags=["Template Builder"])
+except ImportError:
+    pass
 
 

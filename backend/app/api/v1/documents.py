@@ -98,7 +98,7 @@ async def create_document(
         tags=document_in.tags or [],
         owner_id=owner_id,
         created_by_id=current_user.id,
-        status="Draft"
+        status="DRAFT"
     )
     
     db.add(document)
@@ -141,16 +141,37 @@ async def list_documents(
     department: Optional[str] = Query(None, description="Filter by department"),
     status: Optional[str] = Query(None, description="Filter by status"),
     owner_id: Optional[int] = Query(None, description="Filter by owner ID"),
+    show_all_statuses: bool = Query(False, description="Show all document statuses including obsolete"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100)
 ):
     """
     List and search documents with filters (URS-DVM-011)
     
+    By default, shows only Effective documents (controlled versioning).
+    Set show_all_statuses=true to see all documents including drafts and obsolete.
+    
     All authenticated users can list documents
     """
     # Build query
     query = db.query(Document).filter(Document.is_deleted == False)
+    
+    # Workflow statuses that are stored on DocumentVersion, not Document
+    # These include all version workflow states except EFFECTIVE, OBSOLETE, ARCHIVED
+    workflow_statuses = {
+        VersionStatus.DRAFT,
+        VersionStatus.UNDER_REVIEW, 
+        VersionStatus.PENDING_APPROVAL, 
+        VersionStatus.APPROVED,
+        VersionStatus.REJECTED
+    }
+    
+    # Check if status is a workflow status (stored on versions)
+    is_workflow_status = status and status.upper() in [s.value for s in workflow_statuses]
+    
+    # Default filter: Show only EFFECTIVE documents unless explicitly requested otherwise
+    if not show_all_statuses and not status:
+        query = query.filter(Document.status == "EFFECTIVE")
     
     # Apply filters
     if title:
@@ -160,7 +181,27 @@ async def list_documents(
     if department:
         query = query.filter(Document.department == department)
     if status:
-        query = query.filter(Document.status == status)
+        if is_workflow_status:
+            # Filter by latest version's status for workflow statuses
+            # Use a subquery to find documents with latest versions matching the status
+            # Convert string status to VersionStatus enum
+            try:
+                status_enum = VersionStatus(status.upper())
+            except ValueError:
+                # Invalid status, skip this filter
+                pass
+            else:
+                # Subquery to get document IDs with latest versions matching the status
+                from sqlalchemy import select
+                subquery = select(DocumentVersion.document_id).filter(
+                    DocumentVersion.is_latest == True,
+                    DocumentVersion.status == status_enum
+                )
+                query = query.filter(Document.id.in_(subquery))
+        else:
+            # Filter by document status for non-workflow statuses (case-insensitive)
+            # Document.status might be stored as "Draft" or "EFFECTIVE" etc.
+            query = query.filter(Document.status.ilike(status))
     if owner_id:
         query = query.filter(Document.owner_id == owner_id)
     

@@ -25,12 +25,25 @@ export interface DocumentVersion {
   id: number;
   document_id: number;
   version_number: number;
+  version_string: string | null; // Semantic version (v0.1, v1.0, v1.1, v2.0)
   content_html: string | null;
   content_hash: string | null;
   change_summary: string | null;
+  change_reason: string | null; // Why this version was created
+  change_type: 'Minor' | 'Major' | null; // Type of change
   status: VersionStatus;
   attachments_metadata: any[];
   docx_attachment_id: number | null;
+  
+  // Version hierarchy
+  parent_version_id: number | null;
+  is_latest: boolean;
+  replaced_by_version_id: number | null;
+  
+  // Lifecycle dates
+  effective_date: string | null;
+  obsolete_date: string | null;
+  
   created_by_id: number;
   created_at: string;
   updated_at: string;
@@ -52,6 +65,8 @@ export interface DocumentVersion {
   lock_version: number;
   created_by_username?: string;
   created_by_full_name?: string;
+  approved_by_username?: string;
+  approved_by_full_name?: string;
   is_locked: boolean;
   locked_by_user_id: number | null;
   locked_by_username: string | null;
@@ -59,14 +74,16 @@ export interface DocumentVersion {
 }
 
 export type VersionStatus = 
-  | 'Draft'
-  | 'Under Review'
-  | 'Pending Approval'
-  | 'Approved'
-  | 'Published'
-  | 'Rejected'
-  | 'Archived'
-  | 'Obsolete';
+  | 'DRAFT'
+  | 'UNDER_REVIEW'
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
+  | 'EFFECTIVE' // Uppercase to match database enum
+  | 'REJECTED'
+  | 'OBSOLETE' // Uppercase to match database enum
+  | 'ARCHIVED';
+
+export type ChangeType = 'Minor' | 'Major';
 
 export interface EditLock {
   id: number;
@@ -141,7 +158,15 @@ export interface UpdateDocumentRequest {
 export interface CreateVersionRequest {
   content_html?: string;
   change_summary?: string;
+  change_reason?: string;
+  change_type?: ChangeType;
+  parent_version_id?: number;
   attachments_metadata?: any[];
+}
+
+export interface CreateNewVersionRequest {
+  change_reason: string;
+  change_type: ChangeType;
 }
 
 export interface SaveVersionRequest {
@@ -175,6 +200,31 @@ export interface DocumentComment {
   comment_text: string;
   selected_text?: string;
   selection_start?: number;
+  selection_end?: number;
+  text_context?: string;
+  is_resolved: boolean;
+  resolved_at?: string;
+  resolved_by_id?: number;
+  resolved_by_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommentCreate {
+  comment_text: string;
+  selected_text?: string;
+  selection_start?: number;
+  selection_end?: number;
+  text_context?: string;
+}
+
+export interface CommentListResponse {
+  comments: DocumentComment[];
+  total: number;
+}
+
+
+
   selection_end?: number;
   text_context?: string;
   is_resolved: boolean;

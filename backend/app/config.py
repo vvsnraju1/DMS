@@ -46,6 +46,17 @@ class Settings(BaseSettings):
     # Audit
     AUDIT_LOG_RETENTION_DAYS: int = 2555  # ~7 years for pharma compliance
     
+    # Email/SMTP Configuration
+    SMTP_HOST: Optional[str] = "smtp.gmail.com"
+    SMTP_PORT: int = 587  # Use 587 for TLS, or 465 for SSL
+    SMTP_USER: Optional[str] = "vvsnraju.zerokost@gmail.com"
+    SMTP_PASSWORD: Optional[str] = "hgjy cafr nshl ytzd"
+    SMTP_FROM_EMAIL: Optional[str] = "vvsnraju.zerokost@gmail.com"
+    SMTP_FROM_NAME: str = "DMS Notifications"
+    SMTP_USE_TLS: bool = True  # Use TLS for port 587
+    SMTP_USE_SSL: bool = False  # Use SSL for port 465 (set to True if using port 465)
+    EMAIL_ENABLED: bool = True  # Set to True to enable email notifications
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

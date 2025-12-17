@@ -21,6 +21,16 @@ import DocumentEditor from './pages/Documents/DocumentEditor';
 import DocumentDetail from './pages/Documents/DocumentDetail';
 import PendingTasks from './pages/PendingTasks';
 
+// Template pages
+import TemplateList from './pages/Templates/TemplateList';
+import TemplateDetail from './pages/Templates/TemplateDetail';
+import TemplateUpload from './pages/Templates/TemplateUpload';
+import TemplateVersions from './pages/Templates/TemplateVersions';
+import TemplateReview from './pages/Templates/TemplateReview';
+import TemplateApproval from './pages/Templates/TemplateApproval';
+import TemplateBuilder from './pages/Templates/TemplateBuilder';
+import SOPTemplateBuilder from './pages/Templates/SOPTemplateBuilder';
+
 function App() {
   return (
     <BrowserRouter>
@@ -158,6 +168,116 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <DocumentDetail />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Template management routes */}
+          <Route
+            path="/templates"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TemplateList />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/create"
+            element={
+              <ProtectedRoute requiredRoles={['DMS_Admin', 'Author']}>
+                <Layout>
+                  <SOPTemplateBuilder />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/create-advanced"
+            element={
+              <ProtectedRoute>
+                <TemplateBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:templateId/edit"
+            element={
+              <ProtectedRoute requiredRoles={['DMS_Admin', 'Author']}>
+                <Layout>
+                  <SOPTemplateBuilder />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:templateId/edit-advanced"
+            element={
+              <ProtectedRoute requiredRoles={['DMS_Admin', 'Author']}>
+                <Layout>
+                  <TemplateBuilder />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/upload"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TemplateUpload />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:templateId"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TemplateDetail />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:templateId/versions"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TemplateVersions />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:templateId/versions/:versionId"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TemplateVersions />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:templateId/versions/:versionId/review"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TemplateReview />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/templates/:templateId/versions/:versionId/approve"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TemplateApproval />
                 </Layout>
               </ProtectedRoute>
             }

@@ -49,6 +49,17 @@ const CKEditorWrapper: React.FC<CKEditorWrapperProps> = ({
       'undo',
       'redo',
     ],
+    // Table configuration
+    table: {
+      contentToolbar: [
+        'tableColumn',
+        'tableRow',
+        'mergeTableCells',
+        'tableProperties',
+        'tableCellProperties'
+      ],
+      tableToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'],
+    },
   };
 
   const handleEditorReady = (editor: any) => {
@@ -159,12 +170,90 @@ const CKEditorWrapper: React.FC<CKEditorWrapperProps> = ({
           border-collapse: collapse;
           margin: 1rem 0;
           width: 100%;
+          border: 1px solid #d1d5db;
         }
 
         .ckeditor-wrapper .ck-content table td,
         .ckeditor-wrapper .ck-content table th {
           border: 1px solid #d1d5db;
-          padding: 0.5rem;
+          padding: 0.5rem 0.75rem;
+          text-align: left;
+        }
+
+        .ckeditor-wrapper .ck-content table th {
+          background-color: #f9fafb;
+          font-weight: 600;
+        }
+
+        .ckeditor-wrapper .ck-content table tr:nth-child(even) {
+          background-color: #f9fafb;
+        }
+
+        /* Title page and annexure tables - full width like signatory */
+        /* Break out of content padding to achieve full width */
+        .ckeditor-wrapper .ck-content .title-page-section {
+          width: calc(100% + 3rem) !important;
+          max-width: calc(100% + 3rem) !important;
+          margin-left: -1.5rem !important;
+          margin-right: -1.5rem !important;
+          margin-top: 0;
+          margin-bottom: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        .ckeditor-wrapper .ck-content .title-page-section table {
+          width: 100% !important;
+          max-width: 100% !important;
+          table-layout: fixed !important;
+          border-collapse: collapse;
+          border: 2px solid #000;
+          margin: 0 !important;
+          display: table !important;
+        }
+
+        .ckeditor-wrapper .ck-content .title-page-section table td {
+          box-sizing: border-box;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+        }
+
+        /* Signatory table - full width (break out of padding) */
+        .ckeditor-wrapper .ck-content h2 + table,
+        .ckeditor-wrapper .ck-content table[style*="table-layout: fixed"] {
+          width: calc(100% + 3rem) !important;
+          max-width: calc(100% + 3rem) !important;
+          margin-left: -1.5rem !important;
+          margin-right: -1.5rem !important;
+          table-layout: fixed !important;
+        }
+
+        /* Annexure tables - full width like signatory */
+        .ckeditor-wrapper .ck-content table[style*="annexure"],
+        .ckeditor-wrapper .ck-content .annexure-table,
+        .ckeditor-wrapper .ck-content table.annexure-table {
+          width: calc(100% + 3rem) !important;
+          max-width: calc(100% + 3rem) !important;
+          margin-left: -1.5rem !important;
+          margin-right: -1.5rem !important;
+          table-layout: fixed !important;
+        }
+
+        /* Ensure all tables in title-page-section are full width */
+        .ckeditor-wrapper .ck-content .title-page-section * {
+          box-sizing: border-box;
+        }
+
+        .ckeditor-wrapper .ck-content img {
+          max-width: 100%;
+          height: auto;
+          margin: 1rem 0;
+          border-radius: 0.25rem;
+        }
+
+        /* Fix image loading - use absolute path for public assets */
+        .ckeditor-wrapper .ck-content img[src^="/"] {
+          /* Images from public folder should work, but ensure they're loaded */
         }
 
         .ckeditor-wrapper .ck-content blockquote {

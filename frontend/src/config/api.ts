@@ -17,6 +17,14 @@ export const API_ENDPOINTS = {
   auditLogs: '/audit-logs',
   auditActions: '/audit-logs/actions',
   auditEntityTypes: '/audit-logs/entity-types',
+  
+  // Templates
+  templates: '/templates',
+  templateById: (id: number) => `/templates/${id}`,
+  publishedTemplates: '/templates/published',
+  templateVersions: (id: number) => `/templates/${id}/versions`,
+  templateVersionById: (templateId: number, versionId: number) => `/templates/${templateId}/versions/${versionId}`,
+  templateImage: (templateId: number, filename: string) => `/templates/${templateId}/images/${filename}`,
 };
 
 

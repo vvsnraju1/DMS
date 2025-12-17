@@ -14,6 +14,7 @@ import {
   ScrollText,
   Shield,
   Sparkles,
+  Layers,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -58,10 +59,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login');
   };
 
+  // Check if user can access templates (Author or Admin)
+  const canAccessTemplates = user?.roles?.includes('Author') || user?.roles?.includes('DMS_Admin') || isAdmin;
+
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home, show: true },
     { name: 'Pending Tasks', href: '/tasks', icon: CheckSquare, show: true },
     { name: 'Documents', href: '/documents', icon: FileText, show: true },
+    { name: 'Templates', href: '/templates', icon: Layers, show: canAccessTemplates },
     { name: 'Users', href: '/users', icon: Users, show: isAdmin },
     { name: 'Audit Logs', href: '/audit-logs', icon: ScrollText, show: isAdmin },
   ].filter(item => item.show);

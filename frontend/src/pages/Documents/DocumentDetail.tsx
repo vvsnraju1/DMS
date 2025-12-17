@@ -20,6 +20,7 @@ import { authService } from '../../services/auth.service';
 import AttachmentManager from '../../components/AttachmentManager';
 import ESignatureModal from '../../components/ESignatureModal';
 import ErrorModal from '../../components/ErrorModal';
+import CreateNewVersionDialog from '../../components/CreateNewVersionDialog';
 import { Document as DmsDocument, DocumentVersion } from '../../types/document';
 import { formatISTDateTime } from '../../utils/dateUtils';
 import { resolveApiBaseUrl } from '@/utils/apiUtils';
@@ -65,6 +66,14 @@ export default function DocumentDetail() {
     title: string;
     message: string;
     suggestion?: string;
+  }>({ isOpen: false, title: '', message: '' });
+
+  // Success modal state
+  const [successModal, setSuccessModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    versionString?: string;
   }>({ isOpen: false, title: '', message: '' });
 
   // Export modal state
@@ -171,6 +180,9 @@ export default function DocumentDetail() {
     requireComments?: boolean;
     commentsLabel?: string;
   } | null>(null);
+
+  // Create New Version dialog state
+  const [showCreateVersionDialog, setShowCreateVersionDialog] = useState(false);
 
   const loadDocument = async () => {
     try {
@@ -399,11 +411,51 @@ export default function DocumentDetail() {
     setShowESignModal(true);
   };
 
+  const handleCreateNewVersion = async (data: { change_reason: string; change_type: 'Minor' | 'Major' }) => {
+    if (!latestVersion) return;
+
+    setActionLoading(true);
+    try {
+      const newVersion = await versionService.createNewVersion(
+        documentId,
+        latestVersion.id,
+        {
+          change_reason: data.change_reason,
+          change_type: data.change_type
+        }
+      );
+
+      // Close dialog
+      setShowCreateVersionDialog(false);
+
+      // Reload document to show new version
+      await loadDocument();
+
+      // Show success confirmation
+      setSuccessModal({
+        isOpen: true,
+        title: 'New Version Created Successfully',
+        message: `A new draft version ${newVersion.version_string || `v${newVersion.version_number}`} has been created from ${latestVersion.version_string || `v${latestVersion.version_number}`}.`,
+        versionString: newVersion.version_string || `v${newVersion.version_number}`
+      });
+    } catch (err: any) {
+      console.error('Error creating new version:', err);
+      setErrorModal({
+        isOpen: true,
+        title: 'Failed to Create New Version',
+        message: err.response?.data?.detail || 'An error occurred while creating the new version.',
+        suggestion: 'Please try again or contact support if the issue persists.',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const canEdit = () => {
     if (!user || !latestVersion) return false;
-    // Can edit if Draft and (Author or Admin)
+    // Can edit if DRAFT and (Author or Admin)
     return (
-      latestVersion.status === 'Draft' &&
+      latestVersion.status === 'DRAFT' &&
       (user.roles.includes('Author') || user.roles.includes('DMS_Admin'))
     );
   };
@@ -411,7 +463,7 @@ export default function DocumentDetail() {
   const canSubmitForReview = () => {
     if (!user || !latestVersion) return false;
     return (
-      latestVersion.status === 'Draft' &&
+      latestVersion.status === 'DRAFT' &&
       (user.roles.includes('Author') || user.roles.includes('DMS_Admin'))
     );
   };
@@ -419,7 +471,7 @@ export default function DocumentDetail() {
   const canReview = () => {
     if (!user || !latestVersion) return false;
     return (
-      latestVersion.status === 'Under Review' &&
+      latestVersion.status === 'UNDER_REVIEW' &&
       (user.roles.includes('Reviewer') || user.roles.includes('DMS_Admin'))
     );
   };
@@ -427,7 +479,7 @@ export default function DocumentDetail() {
   const canApprove = () => {
     if (!user || !latestVersion) return false;
     return (
-      latestVersion.status === 'Pending Approval' &&
+      latestVersion.status === 'PENDING_APPROVAL' &&
       (user.roles.includes('Approver') || user.roles.includes('DMS_Admin'))
     );
   };
@@ -435,8 +487,18 @@ export default function DocumentDetail() {
   const canPublish = () => {
     if (!user || !latestVersion) return false;
     return (
-      latestVersion.status === 'Approved' &&
+      latestVersion.status === 'APPROVED' &&
       user.roles.includes('DMS_Admin')
+    );
+  };
+
+  const canCreateNewVersion = () => {
+    if (!user || !latestVersion || !document) return false;
+    // Can create new version from EFFECTIVE documents
+    // Requires Author (owner) or Admin
+    return (
+      latestVersion.status === 'EFFECTIVE' &&
+      (user.roles.includes('Author') || user.roles.includes('DMS_Admin'))
     );
   };
 
@@ -447,13 +509,14 @@ export default function DocumentDetail() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      'Draft': 'bg-gray-200 text-gray-800',
-      'Under Review': 'bg-blue-200 text-blue-800',
-      'Pending Approval': 'bg-yellow-200 text-yellow-800',
-      'Approved': 'bg-green-200 text-green-800',
-      'Published': 'bg-green-200 text-green-800',
-      'Archived': 'bg-red-200 text-red-800',
-      'Rejected': 'bg-red-200 text-red-800',
+      'DRAFT': 'bg-gray-200 text-gray-800',
+      'UNDER_REVIEW': 'bg-blue-200 text-blue-800',
+      'PENDING_APPROVAL': 'bg-yellow-200 text-yellow-800',
+      'APPROVED': 'bg-purple-200 text-purple-800',
+      'EFFECTIVE': 'bg-green-200 text-green-800',
+      'REJECTED': 'bg-red-300 text-red-900',
+      'OBSOLETE': 'bg-gray-300 text-gray-600',
+      'ARCHIVED': 'bg-red-200 text-red-800',
     };
     return colors[status] || 'bg-gray-200 text-gray-800';
   };
@@ -537,7 +600,7 @@ export default function DocumentDetail() {
               <h3 className="text-sm font-semibold text-orange-800">
                 ⚠️ {unresolvedComments} Unresolved Comment{unresolvedComments > 1 ? 's' : ''}
               </h3>
-              {latestVersion?.status === 'Draft' ? (
+              {latestVersion?.status === 'DRAFT' ? (
                 <p className="text-sm text-orange-700 mt-1">
                   <strong>HIGH PRIORITY:</strong> This document was returned with reviewer comments. Please open the editor, review all comments, make necessary changes, and resolve each comment. You cannot resubmit until all comments are resolved.
                 </p>
@@ -651,6 +714,17 @@ export default function DocumentDetail() {
           </button>
         )}
 
+        {canCreateNewVersion() && (
+          <button
+            onClick={() => setShowCreateVersionDialog(true)}
+            disabled={actionLoading}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            <FileText size={18} />
+            Create New Version
+          </button>
+        )}
+
         {canArchive() && latestVersion?.status !== 'Archived' && (
           <button
             onClick={handleArchive}
@@ -663,7 +737,16 @@ export default function DocumentDetail() {
         )}
 
         <button
-          onClick={() => {
+          onClick={async () => {
+            // Mark as viewed in backend (for validation)
+            if (latestVersion) {
+              try {
+                await versionService.markAsViewed(documentId, latestVersion.id);
+              } catch (err) {
+                console.warn('Failed to mark document as viewed:', err);
+              }
+            }
+            // Also mark in sessionStorage (for frontend UI)
             markAsViewed();
             navigate(`/documents/${documentId}/edit`);
           }}
@@ -828,6 +911,46 @@ export default function DocumentDetail() {
         suggestion={errorModal.suggestion}
       />
 
+      {/* Success Modal for New Version Creation */}
+      {successModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            <div className="px-6 py-4 bg-green-50 border-b border-green-200">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+                <h3 className="text-lg font-semibold text-green-800">
+                  {successModal.title}
+                </h3>
+              </div>
+            </div>
+            <div className="px-6 py-4">
+              <p className="text-gray-700 mb-2">{successModal.message}</p>
+              {successModal.versionString && (
+                <p className="text-sm text-gray-600">
+                  <strong>New Version:</strong> {successModal.versionString}
+                </p>
+              )}
+              <p className="text-sm text-gray-600 mt-2">
+                You will be redirected to the editor to start editing the new draft version.
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setSuccessModal({ ...successModal, isOpen: false });
+                  // Navigate to editor for the new draft version
+                  navigate(`/documents/${documentId}/edit`);
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+              >
+                <Edit size={16} />
+                Open Editor
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Export DOCX Modal with E-Signature */}
       {showExportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -905,6 +1028,16 @@ export default function DocumentDetail() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Create New Version Dialog */}
+      {showCreateVersionDialog && latestVersion && (
+        <CreateNewVersionDialog
+          isOpen={showCreateVersionDialog}
+          onClose={() => setShowCreateVersionDialog(false)}
+          onSubmit={handleCreateNewVersion}
+          currentVersionString={latestVersion.version_string || `v${latestVersion.version_number}`}
+        />
       )}
     </div>
   );

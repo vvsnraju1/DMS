@@ -19,6 +19,7 @@ export interface DocumentSearchParams {
   search?: string;
   department?: string;
   status?: string;
+  show_all_statuses?: boolean;
 }
 
 const documentService = {

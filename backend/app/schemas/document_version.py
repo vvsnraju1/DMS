@@ -4,7 +4,7 @@ Pydantic schemas for DocumentVersion operations
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from app.models.document_version import VersionStatus
+from app.models.document_version import VersionStatus, ChangeType
 
 
 class DocumentVersionBase(BaseModel):
@@ -16,6 +16,9 @@ class DocumentVersionCreate(DocumentVersionBase):
     """Schema for creating a new document version"""
     content_html: Optional[str] = None
     attachments_metadata: Optional[List[Dict[str, Any]]] = []
+    change_reason: Optional[str] = None
+    change_type: Optional[ChangeType] = None
+    parent_version_id: Optional[int] = None
 
 
 class DocumentVersionUpdate(BaseModel):
@@ -38,12 +41,24 @@ class DocumentVersionResponse(BaseModel):
     id: int
     document_id: int
     version_number: int
+    version_string: Optional[str]  # Semantic version (v0.1, v1.0, v1.1, v2.0)
     content_html: Optional[str]
     content_hash: Optional[str]
     change_summary: Optional[str]
+    change_reason: Optional[str]
+    change_type: Optional[ChangeType]
     status: VersionStatus
     attachments_metadata: Optional[List[Dict[str, Any]]]
     docx_attachment_id: Optional[int]
+    
+    # Version hierarchy
+    parent_version_id: Optional[int]
+    is_latest: bool
+    replaced_by_version_id: Optional[int]
+    
+    # Lifecycle dates
+    effective_date: Optional[datetime]
+    obsolete_date: Optional[datetime]
     
     # Workflow metadata
     created_by_id: int
@@ -76,6 +91,8 @@ class DocumentVersionResponse(BaseModel):
     # User info
     created_by_username: Optional[str] = None
     created_by_full_name: Optional[str] = None
+    approved_by_username: Optional[str] = None
+    approved_by_full_name: Optional[str] = None
     
     # Lock status
     is_locked: bool = False
@@ -93,10 +110,17 @@ class DocumentVersionListItem(BaseModel):
     id: int
     document_id: int
     version_number: int
+    version_string: Optional[str] = None
     status: VersionStatus
-    change_summary: Optional[str]
+    change_summary: Optional[str] = None
+    change_reason: Optional[str] = None
+    change_type: Optional[ChangeType] = None
+    is_latest: Optional[bool] = None
+    effective_date: Optional[datetime] = None
+    obsolete_date: Optional[datetime] = None
     created_by_id: int
-    created_by_username: Optional[str]
+    created_by_username: Optional[str] = None
+    approved_by_username: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     
@@ -139,5 +163,47 @@ class PublishRequest(WorkflowAction):
     """Schema for publishing action"""
     effective_date: Optional[datetime] = None
     password: str  # E-signature: user password for authentication
+
+
+class CreateNewVersionRequest(BaseModel):
+    """Schema for creating a new version from an existing effective version"""
+    change_reason: str = Field(..., min_length=10, max_length=1000, description="Reason for creating new version")
+    change_type: ChangeType = Field(..., description="Type of change: Minor or Major")
+    
+    class Config:
+        use_enum_values = True
+
+
+
+
+class SubmitForReviewRequest(WorkflowAction):
+    """Schema for submitting version for review"""
+    reviewer_ids: Optional[List[int]] = []
+    password: str  # E-signature: user password for authentication
+
+
+class ReviewRequest(WorkflowAction):
+    """Schema for review action (approve or request changes)"""
+    password: str  # E-signature: user password for authentication
+
+
+class ApprovalRequest(WorkflowAction):
+    """Schema for approval/rejection action"""
+    password: str  # E-signature: user password for authentication
+
+
+class PublishRequest(WorkflowAction):
+    """Schema for publishing action"""
+    effective_date: Optional[datetime] = None
+    password: str  # E-signature: user password for authentication
+
+
+class CreateNewVersionRequest(BaseModel):
+    """Schema for creating a new version from an existing effective version"""
+    change_reason: str = Field(..., min_length=10, max_length=1000, description="Reason for creating new version")
+    change_type: ChangeType = Field(..., description="Type of change: Minor or Major")
+    
+    class Config:
+        use_enum_values = True
 
 

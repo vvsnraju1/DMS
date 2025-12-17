@@ -12,6 +12,7 @@ import CommentPanel from '../../components/Comments/CommentPanel';
 import CommentPopover from '../../components/Comments/CommentPopover';
 import commentService from '../../services/comment.service';
 import { authService } from '../../services/auth.service';
+import versionService from '../../services/version.service';
 import { DocumentComment } from '../../types/document';
 import { resolveApiBaseUrl } from '@/utils/apiUtils';
 
@@ -83,12 +84,12 @@ export default function DocumentEditor() {
   const [exportReason, setExportReason] = useState('');
   const [exportLoading, setExportLoading] = useState(false);
   
-  // Determine if user can comment (Reviewer, Approver, or Admin) but never on Published versions
+  // Determine if user can comment (Reviewer, Approver, or Admin) but never on Effective/Obsolete versions
   const canComment = () => {
     if (!user || !version) return false;
 
-    // Published SOPs are immutable, so comments are locked
-    if (version.status === 'Published') return false;
+    // EFFECTIVE and OBSOLETE SOPs are immutable, so comments are locked
+    if (version.status === 'EFFECTIVE' || version.status === 'OBSOLETE') return false;
 
     // Reviewers, Approvers, and Admins can comment
     return user.roles?.includes('Reviewer') || user.roles?.includes('Approver') || user.is_admin;
@@ -105,10 +106,10 @@ export default function DocumentEditor() {
     if (user.is_admin || user.roles?.includes('DMS_Admin')) return true;
     
     // Author can see comments when editing their draft (to resolve reviewer comments)
-    if (user.roles?.includes('Author') && version?.status === 'Draft') return true;
+    if (user.roles?.includes('Author') && version?.status === 'DRAFT') return true;
     
     // Reviewers/Approvers when document is under review or pending approval
-    if (canComment() && version?.status !== 'Draft') return true;
+    if (canComment() && version?.status !== 'DRAFT') return true;
     
     return false;
   };
@@ -133,13 +134,13 @@ export default function DocumentEditor() {
     },
   });
   
-  // Check if current user can edit (only Draft status can be edited)
+  // Check if current user can edit (only DRAFT status can be edited)
   const canUserEdit = () => {
     if (!user || !version) return false;
     
-    // Only Draft versions can be edited
-    if (version.status !== 'Draft') {
-      return false; // Under Review, Pending Approval, etc. are read-only
+    // Only DRAFT versions can be edited
+    if (version.status !== 'DRAFT') {
+      return false; // UNDER_REVIEW, PENDING_APPROVAL, etc. are read-only
     }
     
     // User must be Author or Admin to edit
@@ -367,6 +368,17 @@ export default function DocumentEditor() {
       loadComments();
     }
   }, [version?.id]);
+  
+  // Mark document as viewed when opened (required for workflow actions)
+  useEffect(() => {
+    if (version && document) {
+      // Mark as viewed in the backend (for validation)
+      versionService.markAsViewed(document.id, version.id).catch(err => {
+        // Silently fail - this is not critical, just for tracking
+        console.warn('Failed to mark document as viewed:', err);
+      });
+    }
+  }, [version?.id, document?.id]);
   
   // Auto-show comment panel when there are unresolved comments
   useEffect(() => {
@@ -810,7 +822,7 @@ export default function DocumentEditor() {
                 <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-blue-800">
                     <strong>Read-Only Mode:</strong>{' '}
-                    {version.status !== 'Draft' 
+                    {version.status !== 'DRAFT' 
                       ? `This document is "${version.status}" and cannot be edited. ${canComment() ? 'Select text to add comments.' : ''}`
                       : isLocked 
                         ? `This document is locked by ${lockInfo?.locked_by || 'another user'}. You cannot edit it.`

@@ -164,6 +164,62 @@ const versionService = {
     );
     return response.data;
   },
+
+  /**
+   * Create new version from existing Effective version
+   * This is the main versioning endpoint for controlled document versioning
+   */
+  async createNewVersion(
+    documentId: number, 
+    versionId: number, 
+    data: { change_reason: string; change_type: 'Minor' | 'Major' }
+  ): Promise<DocumentVersion> {
+    const response = await api.post<DocumentVersion>(
+      `/documents/${documentId}/versions/${versionId}/create-new`,
+      data
+    );
+    return response.data;
+  },
+
+  /**
+   * Get full version history tree including obsolete versions
+   */
+  async getVersionHistory(documentId: number): Promise<DocumentVersion[]> {
+    const response = await api.get<DocumentVersion[]>(
+      `/documents/${documentId}/versions/history`
+    );
+    return response.data;
+  },
+
+  /**
+   * Get versions with filtering options
+   */
+  async listWithFilters(
+    documentId: number, 
+    options?: {
+      include_obsolete?: boolean;
+      status_filter?: string;
+      page?: number;
+      page_size?: number;
+    }
+  ): Promise<{ versions: DocumentVersion[]; total: number }> {
+    const response = await api.get<{ versions: DocumentVersion[]; total: number }>(
+      `/documents/${documentId}/versions`,
+      { params: options }
+    );
+    return response.data;
+  },
+
+  /**
+   * Mark document version as viewed by current user
+   * Required before performing workflow actions (approve, reject, publish)
+   */
+  async markAsViewed(documentId: number, versionId: number): Promise<{ message: string; viewed_at: string }> {
+    const response = await api.post<{ message: string; viewed_at: string }>(
+      `/documents/${documentId}/versions/${versionId}/mark-viewed`
+    );
+    return response.data;
+  },
 };
 
 export default versionService;

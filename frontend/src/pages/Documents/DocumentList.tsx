@@ -16,7 +16,7 @@ export default function DocumentList() {
   // Check if user can create documents (Admin or Author)
   const canCreateDocuments = user?.roles?.includes('DMS_Admin') || user?.roles?.includes('Author');
   
-  // Filters - Only Published documents shown here
+  // Filters - Only Effective documents shown here
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   
@@ -26,7 +26,7 @@ export default function DocumentList() {
   const [totalDocs, setTotalDocs] = useState(0);
   const pageSize = 10;
 
-  // Load documents - ONLY Published documents
+  // Load documents - ONLY Effective documents
   const loadDocuments = async () => {
     try {
       setLoading(true);
@@ -37,7 +37,7 @@ export default function DocumentList() {
         limit: pageSize,
         search: searchQuery || undefined,
         department: departmentFilter || undefined,
-        status: 'Published', // Always filter by Published only
+        status: 'EFFECTIVE', // Always filter by EFFECTIVE only (controlled versioning)
       });
       
       setDocuments(response.items || []);
@@ -65,11 +65,14 @@ export default function DocumentList() {
   // Status badge color
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      'Draft': 'bg-gray-200 text-gray-800',
-      'Under Review': 'bg-blue-200 text-blue-800',
-      'Pending Approval': 'bg-yellow-200 text-yellow-800',
-      'Published': 'bg-green-200 text-green-800',
-      'Archived': 'bg-red-200 text-red-800',
+      'DRAFT': 'bg-gray-200 text-gray-800',
+      'UNDER_REVIEW': 'bg-blue-200 text-blue-800',
+      'PENDING_APPROVAL': 'bg-yellow-200 text-yellow-800',
+      'APPROVED': 'bg-purple-200 text-purple-800',
+      'EFFECTIVE': 'bg-green-200 text-green-800',
+      'REJECTED': 'bg-red-300 text-red-900',
+      'OBSOLETE': 'bg-gray-300 text-gray-600',
+      'ARCHIVED': 'bg-red-200 text-red-800',
     };
     return colors[status] || 'bg-gray-200 text-gray-800';
   };
@@ -79,9 +82,9 @@ export default function DocumentList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="page-title">Published Documents</h1>
+          <h1 className="page-title">Effective Documents</h1>
           <p className="page-subtitle">
-            Official SOP documents approved for use
+            Official SOP documents approved and effective for use
           </p>
         </div>
         <div className="flex gap-3">
@@ -111,9 +114,10 @@ export default function DocumentList() {
             <FileText className="text-emerald-600" size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-emerald-900">Official Published Documents</h3>
+            <h3 className="font-bold text-emerald-900">Official Effective Documents</h3>
             <p className="text-sm text-emerald-700 mt-1">
-              This page shows <strong>only published</strong> SOP documents that are official and approved for use.
+              This page shows <strong>only effective</strong> SOP documents that are official and approved for use.
+              Only one version per document can be Effective at a time (controlled versioning).
               Documents in draft, review, or approval stages appear in the <strong>Pending Tasks</strong> page based on your role.
             </p>
           </div>
@@ -217,11 +221,11 @@ export default function DocumentList() {
       {!loading && !error && documents && documents.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm">
           <FileText size={48} className="mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No published documents found</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No effective documents found</h3>
           <p className="text-gray-600 mb-4">
             {searchQuery || departmentFilter
               ? 'Try adjusting your filters'
-              : 'No documents have been published yet'}
+              : 'No documents have been made effective yet'}
           </p>
           {canCreateDocuments && !searchQuery && !departmentFilter && (
             <div className="flex flex-col items-center gap-3">

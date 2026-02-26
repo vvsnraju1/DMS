@@ -1,3 +1,115 @@
+# API Reference (selected endpoints)
+
+This file documents key API endpoints exposed by the backend (FastAPI). The base prefix for the API is `/api/v1`.
+
+## Authentication
+
+### POST /api/v1/auth/login
+- Description: Authenticate user and obtain JWT access token. Supports single-session enforcement.
+- Request (application/json):
+
+```json
+{
+  "username": "admin",
+  "password": "Admin@123456",
+  "force_login": false
+}
+```
+- Responses:
+  - 200: Token object (access_token, token_type, user info)
+  - 401: Invalid credentials
+  - 409: Session conflict (when another session is active)
+
+Example success response:
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "bearer",
+  "user": { "id": 1, "username": "admin", "roles": ["DMS_Admin"] }
+}
+```
+
+### GET /api/v1/auth/me
+- Description: Get profile of current authenticated user.
+- Authentication: Bearer token required
+- Responses: 200: User profile
+
+### POST /api/v1/auth/logout
+- Description: Clears current active session
+- Responses: 200: {"message":"Successfully logged out"}
+
+### GET /api/v1/auth/validate-session
+- Description: Validate that the client's token is still the active session.
+- Responses: {"valid": true|false, "reason": "..."}
+
+## User Management (Admin)
+
+All endpoints under `/api/v1/users` require admin privileges (see `require_admin` dependency).
+
+### POST /api/v1/users
+- Create a new user
+- Request: `UserCreate` schema (username, email, password, role_ids...)
+- Responses: 201 Created: User object
+
+### GET /api/v1/users
+- List users with pagination and filters
+- Query params: `page`, `page_size`, `role`, `is_active`, `search`
+- Responses: 200: `UserListResponse`
+
+### GET /api/v1/users/{user_id}
+- Get user by id (200) or 404 if not found
+
+### PUT /api/v1/users/{user_id}
+- Update a user (Admin only); returns updated user
+
+### PATCH /api/v1/users/{user_id}/activate
+### PATCH /api/v1/users/{user_id}/deactivate
+- Activate or deactivate user accounts
+
+### POST /api/v1/users/{user_id}/reset-password
+- Admin resets a user's password; returns a message and `requires_password_change` flag
+
+### DELETE /api/v1/users/{user_id}
+- Delete a user (204 No Content)
+
+## Document Management
+
+Base path: `/api/v1/documents`
+
+### POST /api/v1/documents
+- Create a document
+- Request: `DocumentCreate` (title, department, description, owner_id optional)
+- Responses:
+  - 201 Created: `DocumentResponse`
+  - 403 Forbidden: insufficient privileges
+
+### GET /api/v1/documents
+- List/search documents. Query params include `title`, `document_number`, `department`, `status`, `owner_id`, `show_all_statuses`, `page`, `page_size`.
+
+### GET /api/v1/documents/{document_id}
+- Get document metadata and version history (200) or 404
+
+### PATCH /api/v1/documents/{document_id}
+- Update document metadata (owner change requires admin)
+
+### DELETE /api/v1/documents/{document_id}
+- Soft delete a document (only drafts or rejected allowed)
+
+## Comments, Attachments, Versions, Templates
+
+The API provides endpoints for comments, attachments, document versions, templates, template-builder, export, print control, and AI insights under the `/api/v1` router. Use the auto-generated Swagger UI at `/api/docs` for a full interactive listing.
+
+## Status Codes (common)
+
+- 200 OK — Successful GET/POST (non-creation)
+- 201 Created — Resource created
+- 204 No Content — Successful delete
+- 400 Bad Request — Validation or logical error
+- 401 Unauthorized — Authentication missing or invalid
+- 403 Forbidden — Authenticated but lacks privileges
+- 404 Not Found — Resource missing
+- 409 Conflict — Session conflict or duplicate resource
 # API Documentation
 
 Complete API reference for Pharma DMS Phase 1: User Management
